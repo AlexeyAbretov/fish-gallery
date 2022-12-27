@@ -5,6 +5,7 @@
 
     min-height: 300px;
     max-width: 260px;
+    min-width: 260px;
 
     border-radius: 8px;
     border: 1px solid #ebebeb;
