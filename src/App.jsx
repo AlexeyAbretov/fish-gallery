@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 
 import styles from './App.css';
 import { Tabs } from "./components";
@@ -12,31 +12,63 @@ function uuidv4() {
     );
 }
 
+const FishCardReducer = (state, action) => {
+    const { type, payload } = action;
+
+    switch (type) {
+        case 'SET_LIKED': {
+            return {
+                ...state,
+                liked: state.liked.includes(payload) ?
+                    state.liked.filter(x => x !== id) :
+                    [...state.liked, payload]
+                
+            };
+        }
+        case 'SET_DELETED': {
+            return {
+                ...state,
+                deleted: [...state.deleted, payload]
+            };
+        }
+        case 'SET_CARDS': {
+            return {
+                ...state,
+                cards: payload
+            }
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
+const InitialFishCards = {
+    liked: [],
+    deleted: [],
+    cards: [],
+}
+
 export const App = () => {
-    const [liked, setLiked] = useState([]);
-    const [deleted, setDeleted] = useState([]);
-    const [cards, setCards] = useState([]);
+    const [state, dispatch] = useReducer(FishCardReducer, InitialFishCards);
     const [currentTab, setCurrentTab] = useState(1);
 
     useEffect(() => {
         fetch("/api/species")
             .then(result => result.json())
-            .then(result => setCards(result.slice(0, 10).map(x => ({
+            .then(result => dispatch({ type: 'SET_CARDS', payload: result.slice(0, 10).map(x => ({
                 id: uuidv4(),
                 title: x['Species Name'],
                 imgUrl: x['Species Illustration Photo'].src,
                 imgAlt: x['Species Illustration Photo'].alt,
                 imgTitle: x['Species Illustration Photo'].title,
                 isLiked: false
-            }))))
+            }))}))
     }, [])
 
     return <FishCardContext.Provider value={{
-        cards,
-        liked,
-        deleted,
-        setDeleted,
-        setLiked
+        state,
+        dispatch
     }}>
         <div className={styles.App}>
             <Tabs items={[{
