@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+
 import styles from './App.css';
-import { FishCardList } from "./components";
+
+import { FishCardListContainer } from "./containers";
+import { FishCardContext } from "./contexts";
 
 function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
@@ -26,12 +29,14 @@ export const App = () => {
             }))))
     }, [])
 
-    return <div className={styles.App}>
-        <FishCardList
-            items={cards.filter(card => !deleted.includes(card.id)).map(card => ({ ...card, isLiked: liked.includes(card.id) }))}
-            onLike={(id) => liked.includes(id)
-                ? setIsLiked(liked.filter(x => x !== id)) : setIsLiked([...liked, id])}
-            onDelete={(id) => setDeleted([...deleted, id])}
-        />
-    </div>;
+    return <FishCardContext.Provider value={{
+        items: cards.filter(card => !deleted.includes(card.id)).map(card => ({ ...card, isLiked: liked.includes(card.id) })),
+        onLike: (id) => liked.includes(id)
+            ? setIsLiked(liked.filter(x => x !== id)) : setIsLiked([...liked, id]),
+        onDelete: (id) => setDeleted([...deleted, id])
+    }}>
+        <div className={styles.App}>
+            <FishCardListContainer />
+        </div>
+    </FishCardContext.Provider>;
 };
