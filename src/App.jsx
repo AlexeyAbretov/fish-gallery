@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 import styles from './App.css';
+import { Tabs } from "./components";
 
-import { FishCardListContainer } from "./containers";
+import { FishCardListContainer, FishCardFavoritesContainer } from "./containers";
 import { FishCardContext } from "./contexts";
 
 function uuidv4() {
@@ -12,9 +13,10 @@ function uuidv4() {
 }
 
 export const App = () => {
-    const [liked, setIsLiked] = useState([]);
+    const [liked, setLiked] = useState([]);
     const [deleted, setDeleted] = useState([]);
     const [cards, setCards] = useState([]);
+    const [currentTab, setCurrentTab] = useState(1);
 
     useEffect(() => {
         fetch("/api/species")
@@ -30,13 +32,26 @@ export const App = () => {
     }, [])
 
     return <FishCardContext.Provider value={{
-        items: cards.filter(card => !deleted.includes(card.id)).map(card => ({ ...card, isLiked: liked.includes(card.id) })),
-        onLike: (id) => liked.includes(id)
-            ? setIsLiked(liked.filter(x => x !== id)) : setIsLiked([...liked, id]),
-        onDelete: (id) => setDeleted([...deleted, id])
+        cards,
+        liked,
+        deleted,
+        setDeleted,
+        setLiked
     }}>
         <div className={styles.App}>
-            <FishCardListContainer />
+            <Tabs items={[{
+                    id: 1,
+                    title: 'Рыбы'
+                },
+                {
+                    id: 2,
+                    title: 'Избранное'
+                }]}
+                defaultTab={1}
+                onSelect={(id) => setCurrentTab(id)}
+            />
+            {currentTab === 1 && <FishCardListContainer />}
+            {currentTab === 2 && <FishCardFavoritesContainer />}
         </div>
     </FishCardContext.Provider>;
 };

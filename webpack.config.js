@@ -40,7 +40,11 @@ module.exports = {
         modules: [
             'node_modules',
             './src'
-        ]
+        ],
+        alias: {
+            '@components': [path.resolve(__dirname, './src/components')],
+            '@contexts': [path.resolve(__dirname, './src/contexts')],
+        }
     },
     devServer: {
         static: {
